@@ -1,30 +1,32 @@
 package com.bankingApplication.ICIN_Bank.service;
 
-import javax.transaction.Transactional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.bankingApplication.ICIN_Bank.model.Admin;
-import com.bankingApplication.ICIN_Bank.repository.adminRepository;
+import com.bankingApplication.ICIN_Bank.model.User;
 
 
 @Service
-@Transactional
 public class AdminService {
-
 	
 	@Autowired
-	private adminRepository admRepository;
-
+	com.bankingApplication.ICIN_Bank.DAO.MyRepo repo;
 	
-
-	public Admin getAdmin(Integer admin_id) {
-		return admRepository.findById(admin_id).get();
+	public List<User> getAllUsers(){
+		return (List<User>) repo.findAll();
+		
 	}
-
 	
-
-
-
+	public User getUserById( long id) {
+		return repo.findById(id);
+		
+	}
+	
+	public void deleteUserById(long id) {
+		repo.delete(repo.findById(id));
+		
+	}	
+	
 }

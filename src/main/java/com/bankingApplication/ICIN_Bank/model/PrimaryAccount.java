@@ -11,16 +11,19 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 
-/* Savings Account */
+
+/*Primary account model*/
+
 @Entity
-public class SavingsAccount {
+public class PrimaryAccount {
 
 	@Id
     @GeneratedValue
     private Long id;
     private int accountNumber;
     private Long accountBalance;
-   
+    
+
     public int getAccountNumber() {
         return accountNumber;
     }
@@ -29,6 +32,7 @@ public class SavingsAccount {
         this.accountNumber = accountNumber;
     }
 
+  
     public Long getAccountBalance() {
 		return accountBalance;
 	}
@@ -39,3 +43,6 @@ public class SavingsAccount {
 	
 
 }
+
+
+

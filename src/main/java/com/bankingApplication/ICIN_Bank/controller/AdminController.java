@@ -1,36 +1,86 @@
 package com.bankingApplication.ICIN_Bank.controller;
 
-import java.util.NoSuchElementException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bankingApplication.ICIN_Bank.model.Admin;
+import com.bankingApplication.ICIN_Bank.exceptions.ResourceNotFoundException;
+import com.bankingApplication.ICIN_Bank.model.Transaction;
+import com.bankingApplication.ICIN_Bank.model.User;
 import com.bankingApplication.ICIN_Bank.service.AdminService;
+import com.bankingApplication.ICIN_Bank.service.TransactionService;
+import com.bankingApplication.ICIN_Bank.serviceImpl.RegisterService;
+
+
+
+
+
 
 
 @RestController
+@RequestMapping(path = "/admin",method = RequestMethod.GET)
+@CrossOrigin(origins = "http://localhost:4200")
 public class AdminController {
+	
+@Autowired
+RegisterService regservice;
 
+@Autowired
+TransactionService transactionService;
 	
-	@Autowired
-	private AdminService adminService;
-	
-	
-	//get particular customers by their ID
-	@GetMapping("/customers/{admin_id}")
-	public ResponseEntity<Admin> getAdmin(@PathVariable Integer admin_id)
+
+@Autowired
+AdminService adminservice;
+	@RequestMapping(path = "/getallusers", method = RequestMethod.GET)
+	public List<User> getAllUsers() throws Exception
 	{
+			
+			return adminservice.getAllUsers();
+	}
+	
+	
+	@RequestMapping(path = "/admin/getuser/{id}", method = RequestMethod.GET)
+	public User getuser(@PathVariable("id")long id) throws ResourceNotFoundException{
+		User user;
 		try {
-			Admin adm = adminService.getAdmin(admin_id);
-			return new ResponseEntity<Admin>(adm,HttpStatus.OK);
-		} catch (NoSuchElementException e) {
-			// TODO Auto-generated catch block
-			return new ResponseEntity<Admin>(HttpStatus.NOT_FOUND);
+			user=adminservice.getUserById(id);
+			return user;
+		}
+		catch(Exception e) {
+			throw new ResourceNotFoundException("User not found for this id :: " + id);
+		
 		}
 	}
+	
+	@RequestMapping(path = "/admin/deleteuser/{id}", method = RequestMethod.DELETE)
+	public void deleteuser(@PathVariable("id") long id) throws ResourceNotFoundException
+	{
+		try {
+			adminservice.deleteUserById(id);
+		}
+		catch(Exception e) {
+			throw new ResourceNotFoundException("User not found for this id :: " + id);
+			
+		}
+			
+	}
+	
+	@GetMapping(path = "/accounts/{accountId}/transactions")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public List<Transaction> retrieveAccountTransactions(@PathVariable int accountId) {
+        //PrimaryAccount account = primaryAccountDao.findByAccountNumber(accountId);
+		/*
+		 * if (!account.isPresent()) { throw new AccountNotFoundException(
+		 * String.format("Account %s not found.", accountId)); }
+		 */
+        return transactionService.retrieveTransactionsForAccount(accountId);
+    }
+	
+	
 }

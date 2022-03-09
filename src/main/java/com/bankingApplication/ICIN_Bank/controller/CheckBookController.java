@@ -10,35 +10,50 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bankingApplication.ICIN_Bank.model.CheckBook;
-import com.bankingApplication.ICIN_Bank.service.CheckBookService;
+
+import com.bankingApplication.ICIN_Bank.model.ChequeBook;
+import com.bankingApplication.ICIN_Bank.model.User;
+import com.bankingApplication.ICIN_Bank.service.ChequeBookService;
+
+
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class CheckBookController {
-
 	
 	@Autowired
-	CheckBookService chkService;
-	
-	@PostMapping("/createcheck")
-	public CheckBook createCheckBook(@RequestBody CheckBook checkbook) {
-		System.out.println(checkbook);
-		String cust = checkbook.getCustName();
-		return chkService.createCheckBook(checkbook,cust);
+	ChequeBookService service;
+
+	@PostMapping("/createcheque")
+	@CrossOrigin(origins = "http://localhost:4200")
+	public ChequeBook createChequeBook(@RequestBody ChequeBook chequebook) {
+		System.out.println(chequebook);
+		User user = chequebook.getUser();
+		return service.createChequeBook(chequebook,user);
 		
 	}
 
-	@GetMapping("/allchecks")
-	public List<CheckBook> AllChequeBooks() {
-		return chkService.listAll();
+	@GetMapping("/allcheques")
+	public List<ChequeBook> AllChequeBooks() {
+		return service.AllChequeBooks();
 	}
 
-	@GetMapping("/getcheck/{id}")
-	public CheckBook findCheckbookById(@PathVariable("id") int id) {
-		return (CheckBook) chkService.findByCheckNo(id);
+	@GetMapping("/getcheque/{id}")
+	public ChequeBook findChequebookById(@PathVariable("id") long id) {
+		return service.findChequebookById(id);
 	}
 
+	@GetMapping("/admin/confirmchequetrue/{id}")
+	public void ChequeBookRequestTrue(@PathVariable("id") long id) {
+		service.ChequeBookRequestTrue(id);
+		
+	}
+
+	@GetMapping("/admin/confirmchequefalse/{id}")
+	public void ChequeBookRequestFalse(long id) {
+		service.ChequeBookRequestFalse(id);
+	}
 	
-	
+
 }

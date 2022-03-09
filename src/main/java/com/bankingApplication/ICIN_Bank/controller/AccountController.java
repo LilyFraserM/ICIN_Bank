@@ -6,61 +6,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.bankingApplication.ICIN_Bank.model.CheckingAccount;
+import com.bankingApplication.ICIN_Bank.DAO.PrimaryAccountDao;
+import com.bankingApplication.ICIN_Bank.model.AccountSnapshotContainer;
+
+import com.bankingApplication.ICIN_Bank.model.PrimaryAccount;
 import com.bankingApplication.ICIN_Bank.model.SavingsAccount;
 import com.bankingApplication.ICIN_Bank.model.Transaction;
-import com.bankingApplication.ICIN_Bank.repository.CheckingAccountRepository;
-import com.bankingApplication.ICIN_Bank.service.CheckingService;
-import com.bankingApplication.ICIN_Bank.service.SavingsService;
+
+import com.bankingApplication.ICIN_Bank.service.PrimaryAccountService;
+import com.bankingApplication.ICIN_Bank.service.SavingsAccountService;
 import com.bankingApplication.ICIN_Bank.service.TransactionService;
 
 
 
+@CrossOrigin(origins = "http://localhost:4200")
+@RestController
 public class AccountController {
 	
-
+	@Autowired
+	private PrimaryAccountService primaryAccountService;
 	
 	@Autowired
-	private CheckingService checkingService;
+	private SavingsAccountService savingsAccountService;
 	
 	@Autowired
-	private SavingsService savingsService;
-	
-	@Autowired
-	private CheckingAccountRepository checkingAccountrepo;
+	private PrimaryAccountDao primaryAccountDao;
 	
 	@GetMapping("/deposit/{accType}/{accNo}/{amount}" )
-	//@CrossOrigin(origins = "http://localhost:4200")
+	@CrossOrigin(origins = "http://localhost:4200")
     public Object deposit(@PathVariable String accType, @PathVariable String accNo, @PathVariable String amount) {
 		//System.out.println(accNo);
 		//System.out.println(accType.getClass());
-		if(accType.equals("Checking")) {
+		if(accType.equals("Primary")) {
 			System.out.println(accType);
-			checkingService.deposit(Integer.parseInt(accNo) , Long.parseLong(amount));
-			CheckingAccount chkingAcc = CheckingService.getAccount(Integer.parseInt(accNo));
-			return chkingAcc;
+			primaryAccountService.deposit(Integer.parseInt(accNo) , Long.parseLong(amount));
+			PrimaryAccount primaryAcc = primaryAccountService.getAccount(Integer.parseInt(accNo));
+			return primaryAcc;
 		}	
 		else {
 			System.out.println(accType);
-			savingsService.deposit(Integer.parseInt(accNo) , Long.parseLong(amount));
-			SavingsAccount savingsAcc = savingsService.getAccount(Integer.parseInt(accNo));
+			savingsAccountService.deposit(Integer.parseInt(accNo) , Long.parseLong(amount));
+			SavingsAccount savingsAcc = savingsAccountService.getAccount(Integer.parseInt(accNo));
 			return savingsAcc;
 		}
 			
     }
 	
 	@GetMapping("/withdraw/{accType}/{accNo}/{amount}" )
-	//@CrossOrigin(origins = "http://localhost:4200")
+	@CrossOrigin(origins = "http://localhost:4200")
     public Object withdraw(@PathVariable String accType, @PathVariable String accNo, @PathVariable String amount) {
 		//System.out.println(accNo);
 		//System.out.println(accType.getClass());
-		if(accType.equals("Checking")) {
+		if(accType.equals("Primary")) {
 			System.out.println(accType);
-			String val = checkingService.withdraw(Integer.parseInt(accNo) , Long.parseLong(amount));
+			String val = primaryAccountService.withdraw(Integer.parseInt(accNo) , Long.parseLong(amount));
 			if(val.equals("Done")) {
-			CheckingAccount checkingAcc = checkingService.getAccount(Integer.parseInt(accNo));
-			return checkingAcc;
+			PrimaryAccount primaryAcc = primaryAccountService.getAccount(Integer.parseInt(accNo));
+			return primaryAcc;
 			}
 			else {
 				return "Insufficient Balance";
@@ -68,9 +72,9 @@ public class AccountController {
 		}	
 		else {
 			System.out.println(accType);
-			String val = savingsService.withdraw(Integer.parseInt(accNo) , Long.parseLong(amount));
+			String val = savingsAccountService.withdraw(Integer.parseInt(accNo) , Long.parseLong(amount));
 			if(val.equals("Done")) {
-			SavingsAccount savingsAcc = savingsService.getAccount(Integer.parseInt(accNo));
+			SavingsAccount savingsAcc = savingsAccountService.getAccount(Integer.parseInt(accNo));
 			return savingsAcc;
 			}
 			else
@@ -89,9 +93,9 @@ public class AccountController {
      * @return - List of accounts
      */
     @GetMapping(path="/accounts")
-   // @CrossOrigin(origins = "http://localhost:4200")
-    public Iterable<CheckingAccount> retrieveAllAccounts() {
-        return checkingAccountrepo.findAll();
+    @CrossOrigin(origins = "http://localhost:4200")
+    public Iterable<PrimaryAccount> retrieveAllAccounts() {
+        return primaryAccountDao.findAll();
     }
 
     /**
@@ -100,9 +104,9 @@ public class AccountController {
      * @return Balance available for an account
      */
     @GetMapping(path = "/accounts/{accountNumber}/balance")
-   // @CrossOrigin(origins = "http://localhost:4200")
+    @CrossOrigin(origins = "http://localhost:4200")
     public Long retrieveAccountBalance(@PathVariable int accountNumber) {
-       CheckingAccount account = CheckingAccountRepository.findByAccountNumber(accountNumber);
+        PrimaryAccount account = primaryAccountDao.findByAccountNumber(accountNumber);
 //        if (!account.isPresent()) {
 //            throw new AccountNotFoundException(
 //                  String.format("Account %s not found.", accountId));
@@ -116,7 +120,7 @@ public class AccountController {
      * @return List of transactions for a given bank account
      */
     @GetMapping(path = "/accounts/{accountId}/transactions")
-  //  @CrossOrigin(origins = "http://localhost:4200")
+    @CrossOrigin(origins = "http://localhost:4200")
     public List<Transaction> retrieveAccountTransactions(@PathVariable int accountId) {
         //PrimaryAccount account = primaryAccountDao.findByAccountNumber(accountId);
 		/*
@@ -126,9 +130,27 @@ public class AccountController {
         return transactionService.retrieveTransactionsForAccount(accountId);
     }
     
-  
-    
-
-
+    /**
+     * Finds the available balance and the list of transactions
+     * for the given account
+     * @param accountId - Unique bank account ID
+     * @return Available balance and list of transactions for a given bank account
+     */
+    @GetMapping(path = "/accounts/{accountId}/snapshot")
+    @CrossOrigin(origins = "http://localhost:4200")
+    public AccountSnapshotContainer retrieveAccountBalanceAndListOfTransactions(
+            @PathVariable int accountNo) {
+        PrimaryAccount account = primaryAccountDao.findByAccountNumber(accountNo);
+		/*
+		 * if (!account.isPresent()) { throw new AccountNotFoundException(
+		 * String.format("Account %s not found.", accountId)); }
+		 */
+        AccountSnapshotContainer accountSnapshot =
+                new AccountSnapshotContainer(
+                        account.getAccountNumber(), 
+                        account.getAccountBalance(), 
+                        transactionService.retrieveTransactionsForAccount(accountNo));
+        return accountSnapshot;
+    }
 
 }

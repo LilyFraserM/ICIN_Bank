@@ -18,8 +18,9 @@ public class TransactionController {
 	   // private Transaction transactionService;
 	  private TransactionService transactionService;
 	  
-	  @PostMapping(path = "/transfer")
-	   
+	
+	    @PostMapping(path = "/transfer")
+	    @CrossOrigin(origins = "http://localhost:4200")
 	    public Object transferMoney(@RequestBody Transaction transaction) throws Exception {
 
 	    	  transactionService.transferMoney(transaction);
