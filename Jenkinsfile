@@ -34,7 +34,7 @@ pipeline {
             steps {
                 echo '----------------- This is a build docker image phase ----------'
                 sh '''
-                    docker image build -t ecom-webservice .
+                    docker image build -t ICIN_Bank .
                 '''
             }
         }
@@ -44,7 +44,7 @@ pipeline {
                 echo '----------------- This is a docker deploment phase ----------'
                 sh '''
                  (if  [ $(docker ps -a | grep ecom-webservice | cut -d " " -f1) ]; then \
-                        echo $(docker rm -f ecom-webservice); \
+                        echo $(docker rm -f ICIN_Bank); \
                         echo "---------------- successfully removed ecom-webservice ----------------"
                      else \
                     echo OK; \
