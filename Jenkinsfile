@@ -43,13 +43,13 @@ pipeline {
             steps {
                 echo '----------------- This is a docker deploment phase ----------'
                 sh '''
-                 (if  [ $(docker ps -a | grep ecom-webservice | cut -d " " -f1) ]; then \
+                 (if  [ $(docker ps -a | grep ICIN_Bank | cut -d " " -f1) ]; then \
                         echo $(docker rm -f ICIN_Bank); \
-                        echo "---------------- successfully removed ecom-webservice ----------------"
+                        echo "---------------- successfully removed ICIN_Bank ----------------"
                      else \
                     echo OK; \
                  fi;);
-            docker container run --restart always --name ecom-webservice -p 8081:8081 -d ecom-webservice
+            docker container run --restart always --name ecom-webservice -p 8081:8081 -d ICIN_Bank
             '''
             }
         }
